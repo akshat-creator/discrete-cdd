@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'test_node = neato_path_planning.test_node:main'
+            'teleop = neato_path_planning.teleop:main'
         ],
     },
 )
