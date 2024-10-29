@@ -47,15 +47,18 @@ def initialization(nodes):
     return paths
 
 
-def selection(paths):
+def selection(paths, k):
 
-    k = 20
+    # declare variables
+    gene_pool = []
 
-    # exploitation focused path selection
-    selected_paths = []
-    selected_paths[:] = paths[0 : k + 1]
+    # select ten best paths
+    for _ in range(k):
+        gene_pool.append(heapq.heappop(paths))
 
-    return selected_paths
+    gene_pool += random.sample(paths, k=k)
+
+    return gene_pool
 
 
 def swap(string, idx_1, idx_2):
@@ -68,9 +71,14 @@ def swap(string, idx_1, idx_2):
 
 def pmx_crossover(parent_1, parent_2):
     # declare lists
+
+    # print("parent 1 is", parent_1)
+    # print("parent 2 is", parent_2)
     size = len(parent_1)
     # select random indices for parent 1  and parent 2
-    idx_1 = random.choice(range(size - 1))
+    # idx_1 = 1
+    # idx_2 = 8
+    idx_1 = random.choice(range(2, size - 1))
     idx_2 = random.choice(range(idx_1 + 1, size))
     child_1 = ["0" for _ in parent_1]
     child_2 = ["0" for _ in parent_1]
@@ -81,8 +89,8 @@ def pmx_crossover(parent_1, parent_2):
 
     child_1[idx_1:idx_2] = parent_1[idx_1:idx_2]
     child_2[idx_1:idx_2] = parent_2[idx_1:idx_2]
-    print("The first index is", idx_1)
-    print("The second index is", idx_2)
+    # print("The first index is", idx_1)
+    # print("The second index is", idx_2)
 
     for i in range(idx_1, idx_2):
         char_1 = child_1[i]
@@ -95,31 +103,76 @@ def pmx_crossover(parent_1, parent_2):
     for i, char in enumerate(i_list):
         c1_char = j_list[i]
         p2_idx = parent_2.index(c1_char)
+        # print("The index at p2:", child_1[p2_idx])
 
         if child_1[p2_idx] == "0":
             child_1[p2_idx] = char
         elif child_1[p2_idx] != "0":
-            k_element = child_1[parent_2.index(child_1[p2_idx])]
-            new_index = parent_2.index(k_element)
-            child_1[new_index] = char
+
+            # print("e is at:", parent_2.index(child_1[p2_idx]))
+            child_1[parent_2.index(child_1[p2_idx])] = char
 
     for i, char in enumerate(child_1):
         if char == "0":
             child_1[i] = parent_2[i]
 
-    print(sorted(child_1) == sorted(nodes))
+    # print("".join(child_1))
+    # print(sorted(child_1) == sorted(nodes))
     return "".join(child_1)
 
 
-def crossover_function(paths):
-    pass
+def crossover_function(paths, k):
+
+    # declare offspring
+    children = []
+
+    # choose half random and half best genes in heap
+    selected_genes = selection(paths, k=k)
+
+    # randomize shuffling
+    random.shuffle(x=selected_genes)
+
+    # choose the first 2 indices and mate the genes
+    while len(selected_genes) > 0:
+        parent_1 = selected_genes.pop(0)
+        parent_2 = selected_genes.pop(0)
+
+        print(parent_1)
+        print(parent_2)
+
+        child_1 = pmx_crossover(parent_1[1], parent_2[1])
+        child_2 = pmx_crossover(parent_2[1], parent_1[1])
+
+        if sorted(child_1) == sorted(nodes):
+            children.append(child_1)
+        if sorted(child_2) == sorted(nodes):
+            children.append(child_2)
+
+    return children
+
+
+def add_children(paths, children):
+
+    while len(children) > 0:
+        child = children.pop(0)
+        heapq.heappush(paths, (evaluation(graph, child, nodes), child))
+
+    return paths
 
 
 def main():
-    path_1 = "bfichjgeda"
-    path_2 = "ciabdefhgj"
+    paths = initialization(nodes=nodes)
 
-    print(pmx_crossover(path_1, path_2))
+    print(paths[0][0])
+    while paths[0][0] > 200:
+        children = crossover_function(paths, 10)
+        add_children(paths, children)
+
+    print(paths[0])
+    # parent_1 = "chebdgfjia"
+    # parent_2 = "ejfdghaicb"
+
+    # print(pmx_crossover(parent_1, parent_2))
 
 
 main()
