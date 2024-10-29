@@ -76,10 +76,10 @@ def pmx_crossover(parent_1, parent_2):
     # print("parent 2 is", parent_2)
     size = len(parent_1)
     # select random indices for parent 1  and parent 2
-    # idx_1 = 1
-    # idx_2 = 8
     idx_1 = random.choice(range(2, size - 1))
     idx_2 = random.choice(range(idx_1 + 1, size))
+
+    # create child 1 and child 2
     child_1 = ["0" for _ in parent_1]
     child_2 = ["0" for _ in parent_1]
 
@@ -87,11 +87,11 @@ def pmx_crossover(parent_1, parent_2):
     i_list = []
     j_list = []
 
+    # create two children from the path of the parents
     child_1[idx_1:idx_2] = parent_1[idx_1:idx_2]
     child_2[idx_1:idx_2] = parent_2[idx_1:idx_2]
-    # print("The first index is", idx_1)
-    # print("The second index is", idx_2)
 
+    # for values that are not in both child 1 and child 2 --> create a mapping of two lists
     for i in range(idx_1, idx_2):
         char_1 = child_1[i]
         char_2 = child_2[i]
@@ -100,24 +100,25 @@ def pmx_crossover(parent_1, parent_2):
             i_list.append(char_2)
             j_list.append(char_1)
 
+    # for loop for every character in child 2
     for i, char in enumerate(i_list):
         c1_char = j_list[i]
         p2_idx = parent_2.index(c1_char)
-        # print("The index at p2:", child_1[p2_idx])
 
+        # if there is no character already
         if child_1[p2_idx] == "0":
             child_1[p2_idx] = char
+
+        # if there is a character there -->
         elif child_1[p2_idx] != "0":
 
-            # print("e is at:", parent_2.index(child_1[p2_idx]))
+            # move the new character to where the mapped character is in parent 2
             child_1[parent_2.index(child_1[p2_idx])] = char
 
     for i, char in enumerate(child_1):
         if char == "0":
             child_1[i] = parent_2[i]
 
-    # print("".join(child_1))
-    # print(sorted(child_1) == sorted(nodes))
     return "".join(child_1)
 
 
@@ -140,9 +141,11 @@ def crossover_function(paths, k):
         print(parent_1)
         print(parent_2)
 
+        # produces two children from two parents
         child_1 = pmx_crossover(parent_1[1], parent_2[1])
         child_2 = pmx_crossover(parent_2[1], parent_1[1])
 
+        # makes sure that the crossover is a valid crossover
         if sorted(child_1) == sorted(nodes):
             children.append(child_1)
         if sorted(child_2) == sorted(nodes):
@@ -153,8 +156,11 @@ def crossover_function(paths, k):
 
 def add_children(paths, children):
 
+    # until the length of the children is greater than 0
     while len(children) > 0:
         child = children.pop(0)
+
+        # heappush new children such that the first index is always the shortest path
         heapq.heappush(paths, (evaluation(graph, child, nodes), child))
 
     return paths
@@ -164,18 +170,11 @@ def main():
     paths = initialization(nodes=nodes)
 
     print(paths[0][0])
-    while paths[0][0] > 200:
-        children = crossover_function(paths, 10)
+
+    # create a convergence for the smallest path in the heap
+    while paths[0][0] >= 170:
+        children = crossover_function(paths, 20)
         add_children(paths, children)
-
-    print(paths[0])
-    # parent_1 = "chebdgfjia"
-    # parent_2 = "ejfdghaicb"
-
-    # print(pmx_crossover(parent_1, parent_2))
 
 
 main()
-
-
-# def selection(paths):
