@@ -28,8 +28,7 @@ class PathFollowNode(Node):
         self.target_coord = [0.0, 0.0]
 
         self.unit = 0.5
-        self.path = [[0.0, 0.0], [0.0, self.unit], [self.unit, 0.0], [0.0, 0.0]]
-        # self.path = [[0.0, 0.0], [self.unit, 0.0]]
+        self.path = [[0.0, 0.0], [self.unit, self.unit], [2*self.unit, 2*self.unit], [2*self.unit, 3*self.unit], [3*self.unit, 4*self.unit], [4*self.unit, 4*self.unit]]
 
         self.path_idx = 0
 
@@ -48,13 +47,6 @@ class PathFollowNode(Node):
             current_point = self.path[self.path_idx]
             target_point = self.path[self.path_idx + 1]
             current_vector = [target_point[0]-current_point[0], target_point[1]-current_point[1]]
-
-            print(current_vector)
-
-            # print(f"current point = {current_point}")
-            # print(f"target point = {target_point}")
-            # print(f"current vector = {current_vector}")
-            # print(f"value = {target_point[1]-current_point[1]}")
 
             # Turn to node
             if not self.complete_turn and self.angle != 0.0:
@@ -85,9 +77,6 @@ class PathFollowNode(Node):
 
                 msg.angular.z = self.angular_in
 
-                print(f"target angle = {self.target_angle}")
-                print(f"current angle = {self.angle}")
-
                 if abs(self.angle - self.target_angle) < math.pi/120:
                     self.complete_turn = True
                     msg.angular.z = 0.0
@@ -100,10 +89,7 @@ class PathFollowNode(Node):
 
                 msg.linear.x = 0.1
 
-                print(f"target coord = {self.target_coord}")
-                print(f"current coord = {self.x}, {self.y}")
-
-                if math.dist([self.x, self.y], self.target_coord) < 0.05:
+                if math.dist([self.x, self.y], self.target_coord) < 0.075:
                     self.complete_dist = True
                     msg.linear.x = 0.0
 
@@ -113,8 +99,6 @@ class PathFollowNode(Node):
                 self.calc_dist = False
                 self.calc_turn = False
                 self.path_idx += 1
-                print("------------------------")
-                print("got to node")
 
         self.twist_pub.publish(msg)
         
@@ -136,7 +120,6 @@ def main():
     node = PathFollowNode()
     rclpy.spin(node)
     rclpy.shutdown()
-    print('this works')
 
 if __name__ == "__main__":
     main()
